@@ -16,7 +16,7 @@ uint32_t seq = 0;
 
 extern String DB_MINI_APP_VERSION = "v6.0.5";
 extern int DB_MINI_APP_VERSION_INT = 605;
-extern bool FLAG_DISPLAY_OFF;
+
 
 
 #include <Preferences.h>
@@ -25,12 +25,15 @@ Preferences preferences;
 #include <Adafruit_NeoPixel.h>
 #include <Servo.h>
 //#define BUTTON_PIN   0    // Digital IO pin connected to the button.  This will be
+
 #define PIXEL_PIN    4    // Digital IO pin connected to the NeoPixels.
-#define PIXEL_COUNT 3
+#define PIXEL_COUNT  3
+
 static const int servoPin = 13;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
 Servo myservo;
 
+extern void colorWipe(uint32_t c, uint8_t wait);
 
 bool sponsoring = true;
 char ap_name[40];
@@ -79,8 +82,7 @@ void hook_before_init_ap()
   Serial.println("HOOK BEFORE_INIT");
   Serial.println("HOOK BEFORE_INIT");
   Serial.println("HOOK BEFORE_INIT");
-  SCREEN = 3;
-  mode = CONFIG;
+  colorWipe(strip.Color(255, 0, 0), 1);
 }
 
 void hook_init_ap(char *name, char* fullmac, IPAddress ip)
@@ -137,6 +139,9 @@ void increaseBootCount() {
   preferences.end();
 }
 
+const int BUTTON_PIN_CONF = 18;
+
+
 void setup()
 {
   esp_log_level_set("*", ESP_LOG_VERBOSE);        // set all components to ERROR level
@@ -149,8 +154,8 @@ void setup()
   // syncSemaphore = xSemaphoreCreateBinary();
   // attachInterrupt(digitalPinToInterrupt(motionSensorPin), handleInterrupt, CHANGE);
   static os_config_t config = {
-      .BLINKER_PIN = 33,
-      .BUTTON_MODE_PIN = 37,
+      .BLINKER_PIN = 16,
+      .BUTTON_MODE_PIN = BUTTON_PIN_CONF,
       .SWITCH_PIN_MODE = INPUT_PULLUP,
       .SWITCH_PRESSED_LOGIC = LOW,
       .delay_after_init_ms = 200,
@@ -184,19 +189,22 @@ void setup()
   Serial.println("add wifi");
   os->setup(&config);
 
-      pinMode(37, INPUT_PULLUP);
-      if(digitalRead(37) == LOW) {
-        os->getBlinker()->blink(20);
-        while(digitalRead(37) == LOW) {
-          Serial.println("digitalRead(37) is low");
-        }
-        delay(100);
-        os->enable_config_mode();
-        ESP.restart();
-      }
   myservo.attach(servoPin);
   strip.begin();
-  strip.show(); // Initialize all pixels to 'off'
+
+    colorWipe(strip.Color(0, 0, 0), 1);
+
+  pinMode(BUTTON_PIN_CONF, INPUT_PULLUP);
+  if(digitalRead(BUTTON_PIN_CONF) == LOW) {
+    os->getBlinker()->blink(20);
+    colorWipe(strip.Color(255, 0, 0), 1);
+    while(digitalRead(BUTTON_PIN_CONF) == LOW) {
+      Serial.println("digitalRead(37) is low");
+    }
+    delay(100);
+    os->enable_config_mode();
+    ESP.restart();
+  }
 
   os->start();
 }
