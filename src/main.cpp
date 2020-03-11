@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-
 #include <CMMC_Legend.h>
 #include "SPI.h"
 
@@ -16,8 +15,7 @@ uint32_t seq = 0;
 
 extern String DB_MINI_APP_VERSION = "v6.0.5";
 extern int DB_MINI_APP_VERSION_INT = 605;
-
-
+#include "modules/stripfn.h"
 
 #include <Preferences.h>
 Preferences preferences;
@@ -82,7 +80,7 @@ void hook_before_init_ap()
   Serial.println("HOOK BEFORE_INIT");
   Serial.println("HOOK BEFORE_INIT");
   Serial.println("HOOK BEFORE_INIT");
-  colorWipe(strip.Color(255, 0, 0), 1);
+  colorWipe(strip.Color(255,    0, 0), 1);
 }
 
 void hook_init_ap(char *name, char* fullmac, IPAddress ip)
@@ -173,26 +171,17 @@ void setup()
   mqttModule = new MqttModule();
 
   Serial.println();
-
-  // xTaskCreate(lcd_task, "lcd_task", 4096, NULL, 2, NULL);
-  // xTaskCreate(sensorTask, "sensorTask", 4096, NULL, 1, NULL);
-  // // xTaskCreate(motionTask, "motionTask", 512, NU LL, 1, NULL);
-  //
-  Serial.println("Starting Legend.");
-
   os = new CMMC_Legend(&Serial);
-
 
   os->addModule(wifiModule);
   os->addModule(mqttModule);
 
-  Serial.println("add wifi");
   os->setup(&config);
 
   myservo.attach(servoPin);
   strip.begin();
 
-    colorWipe(strip.Color(0, 0, 0), 1);
+  colorWipe(strip.Color(0, 0, 0), 1);
 
   pinMode(BUTTON_PIN_CONF, INPUT_PULLUP);
   if(digitalRead(BUTTON_PIN_CONF) == LOW) {

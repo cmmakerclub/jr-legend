@@ -1,8 +1,14 @@
 #include "WiFiModule.h"
 extern CMMC_Legend *os;
 
+#include <Adafruit_NeoPixel.h>
 #include <Preferences.h>
 extern Preferences preferences;
+
+extern uint32_t Wheel(byte WheelPos);
+extern void colorWipe(uint32_t c, uint8_t wait);
+extern void rainbow(uint8_t wait);
+extern Adafruit_NeoPixel strip;
 
 static const char* DB_PREF_NAME = "db-conf-wifi";
 
@@ -205,6 +211,7 @@ void WiFiModule::_init_sta()
   prev_ms = millis();
   while (WiFi.status() != WL_CONNECTED)
   {
+      colorWipe(strip.Color(255, 255, 255), 1);
       Serial.print(sta_ssid);
       Serial.print(":");
       Serial.println(sta_pwd);
@@ -219,6 +226,9 @@ void WiFiModule::_init_sta()
     // if (millis() - prev_ms >20L*1000L) {
     //   // ESP.deepSleep(1);
     // }
+    delay(200);
+    colorWipe(strip.Color(0, 0, 0), 1);
+    delay(200);
   }
   Serial.println("WiFi Connected.");
   __wifi_connected = true;
