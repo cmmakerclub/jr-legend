@@ -27,28 +27,28 @@ void MqttModule::config(CMMC_System *os, AsyncWebServer *server) {
 
   preferences.begin("db-conf-mqtt", false);
 
-  // MQTT_HOST = preferences.getString("MQTT_HOST");
-  // MQTT_USERNAME = preferences.getString("MQTT_USERNAME");
-  // MQTT_PASSWORD = preferences.getString("MQTT_PASSWORD");
-  // MQTT_PASSWORD.replace(" ", "+");
-  // MQTT_CLIENT_ID = preferences.getString("MQTT_CLIENT_ID");
-  // MQTT_PREFIX = preferences.getString("MQTT_PREFIX");
-  // MQTT_PORT  = preferences.getUInt("MQTT_PORT");
-  // PUBLISH_EVERY_S = preferences.getUInt("PUBLISH_EVERY_S");
-  // if (PUBLISH_EVERY_S < 1000) {
-  //   PUBLISH_EVERY_S *= 1000;
-  // }
-  // DEVICE_NAME = preferences.getString("DEVICE_NAME");
-  // MQTT_LWT = false; // must be set false for netpie
-  // preferences.end();
+  MQTT_HOST = preferences.getString("MQTT_HOST");
+  MQTT_USERNAME = preferences.getString("MQTT_USERNAME");
+  MQTT_PASSWORD = preferences.getString("MQTT_PASSWORD");
+  MQTT_PASSWORD.replace(" ", "+");
+  MQTT_CLIENT_ID = preferences.getString("MQTT_CLIENT_ID");
+  MQTT_PREFIX = preferences.getString("MQTT_PREFIX");
+  MQTT_PORT  = preferences.getUInt("MQTT_PORT");
+  PUBLISH_EVERY_S = preferences.getUInt("PUBLISH_EVERY_S");
+  if (PUBLISH_EVERY_S < 1000) {
+    PUBLISH_EVERY_S *= 1000;
+  }
+  DEVICE_NAME = preferences.getString("DEVICE_NAME");
+  MQTT_LWT = false; // must be set false for netpie
+  preferences.end();
 
-  MQTT_HOST     = String("mqtt.cmmc.io");
-  MQTT_USERNAME = String("");
-  MQTT_PASSWORD = String("");
-  DEVICE_NAME = "X";
-  MQTT_PREFIX = "PREFIX/";
-  MQTT_PORT  = 1883;
-  PUBLISH_EVERY_S = 50*1000;
+  // MQTT_HOST     = String("mqtt.cmmc.io");
+  // MQTT_USERNAME = String("");
+  // MQTT_PASSWORD = String("");
+  // DEVICE_NAME = "X";
+  // MQTT_PREFIX = "PREFIX/";
+  // MQTT_PORT  = 1883;
+  // PUBLISH_EVERY_S = 50*1000;
 
   Serial.printf("[PREF][MQTT_USERNAME] = %s\r\n", MQTT_USERNAME.c_str());
   Serial.printf("[PREF][MQTT_HOST] = %s\r\n", MQTT_HOST.c_str());
