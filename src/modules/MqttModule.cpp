@@ -1,6 +1,8 @@
 #include <rom/rtc.h>
 
 
+#include <Adafruit_NeoPixel.h>
+#include <Servo.h>
 #include <CMMC_Legend.h>
 #include "MqttModule.h"
 #include "SharedPoolModule.h"
@@ -20,6 +22,44 @@ extern uint32_t seq;
 
 #include <Preferences.h>
 extern Preferences preferences;
+
+extern Adafruit_NeoPixel strip;
+extern Servo myservo;
+
+
+void colorWipe(uint32_t c, uint8_t wait) {
+  for (uint16_t i = 0; i < strip.numPixels(); i++) {
+    strip.setPixelColor(i, c);
+    strip.show();
+    delay(wait);
+  }
+}
+
+
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if (WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if (WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
+void rainbow(uint8_t wait) {
+  uint16_t i, j;
+
+  for (j = 0; j < 256; j++) {
+    for (i = 0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i + j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
 
 void MqttModule::config(CMMC_System *os, AsyncWebServer *server) {
   strcpy(this->path, "/api/mqtt");
@@ -285,21 +325,58 @@ void MqttModule::register_receive_hooks(MqttConnector *mqtt)
 
   mqtt->on_before_message_arrived_once([&](void) {});
   mqtt->on_message([&](const MQTT::Publish & pub) {});
-  mqtt->on_after_message_arrived([&](String topic, String cmd, String payload) {
-    Serial.printf("recv topic: %s\r\n", topic.c_str());
-    Serial.printf("recv cmd: %s\r\n", cmd.c_str());
+ mqtt->on_after_message_arrived([&](String topic, String cmd, String payload) {
+    Serial.printf("topic: %s\r\n", topic.c_str());
+    Serial.printf("cmd: %s\r\n", cmd.c_str());
     Serial.printf("payload: %s\r\n", payload.c_str());
-    mqttMessageTimeoutInSecond = 0;
-    if (cmd == "$/command")
-    {
-      if (payload == "ON")
-      {
-        Serial.println("ON");
+    if (cmd == "$/command") {
+      // if (payload == "ON") {
+      //   digitalWrite(LED_PIN, LOW);
+      // }
+      // else if (payload == "OFF") {
+      //   digitalWrite(LED_PIN, HIGH);
+      // }
+      String inString = payload;
+      if (inString.toFloat() == 0.0f) {
+        Serial.println(inString);
+        if (inString == "A")
+        {
+          colorWipe(strip.Color(0, 0, 255), 1);
+//          Serial.println("Command completed LED turned ON");
+        }
+        if (inString == "B")
+        {
+          colorWipe(strip.Color(0, 255, 0), 1);
+//          Serial.println("Command completed LED turned OFF");
+        }
+        if (inString == "E")
+        {
+          digitalWrite(16, LOW);
+          colorWipe(strip.Color(255, 0, 0), 1);
+//          Serial.println("Command completed LED turned OFF");
+        }
+        if (inString == "D")
+        {
+          colorWipe(strip.Color(255, 255, 255), 1);
+//          Serial.println("Command completed LED turned OFF");
+        }
+        if (inString == "C")
+        {
+          rainbow(50);
+//          Serial.println("Command completed LED turned OFF");
+        }
+
+      } else {
+        Serial.println(inString.toFloat());
+          myservo.write(inString.toFloat()*180);
+
       }
-      else if (payload == "OFF")
-      {
-        Serial.println("OFF");
-      }
+    }
+    else if (cmd == "$/reboot") {
+      ESP.restart();
+    }
+    else {
+      // another message.
     }
   });
 }

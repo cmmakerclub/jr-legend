@@ -22,6 +22,16 @@ extern bool FLAG_DISPLAY_OFF;
 #include <Preferences.h>
 Preferences preferences;
 
+#include <Adafruit_NeoPixel.h>
+#include <Servo.h>
+//#define BUTTON_PIN   0    // Digital IO pin connected to the button.  This will be
+#define PIXEL_PIN    4    // Digital IO pin connected to the NeoPixels.
+#define PIXEL_COUNT 3
+static const int servoPin = 13;
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
+Servo myservo;
+
+
 bool sponsoring = true;
 char ap_name[40];
 char full_mac[40];
@@ -184,6 +194,9 @@ void setup()
         os->enable_config_mode();
         ESP.restart();
       }
+  myservo.attach(servoPin);
+  strip.begin();
+  strip.show(); // Initialize all pixels to 'off'
 
   os->start();
 }
